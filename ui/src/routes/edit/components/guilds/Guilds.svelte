@@ -19,7 +19,8 @@
 	import { cn } from '$theme';
 	import { TextInputModal } from '$components/modals';
 	import { staticIcons } from '$types/icons';
-	import { send, sendAndWait } from '$lib/utils/websocketUtils';
+	import { send } from '$lib/utils/websocketUtils';
+	import { goto } from '$app/navigation';
 	interface PalWithBaseId {
 		pal: Pal;
 		baseId: string;
@@ -625,6 +626,26 @@
 		playerGuild!.name = result;
 		playerGuild!.state = EntryState.MODIFIED;
 	}
+
+	async function handleDeleteGuild() {
+		const confirmed = await modal.showConfirmModal({
+			title: 'Delete Guild',
+			message: 'Are you sure you want to delete this guild? This action cannot be undone.',
+			confirmText: 'Delete',
+			cancelText: 'Cancel'
+		});
+		if (confirmed) {
+			const message = {
+				type: MessageType.DELETE_GUILD,
+				data: {
+					guild_id: playerGuild?.id,
+					origin: 'edit'
+				}
+			};
+			ws.send(JSON.stringify(message));
+			goto('/loading');
+		}
+	}
 </script>
 
 {#if appState.selectedPlayer}
@@ -648,6 +669,11 @@
 					{#if playerGuild && appState.settings.debug_mode}
 						<DebugButton href={`/debug?guildId=${playerGuild.id}`} />
 					{/if}
+					<Tooltip label="Delete entire guild">
+						<button class="btn p-2 hover:bg-red-500/50" onclick={handleDeleteGuild}>
+							<Trash />
+						</button>
+					</Tooltip>
 				</div>
 
 				<div class="flex">
@@ -658,35 +684,6 @@
 							href={`/debug?guildId=${playerGuild.id}&baseId=${currentBase[1].id}`}
 						/>
 					{/if}
-					<Tooltip label="Delete entire guild">
-						<button 
-							class="btn hover:bg-red-500/50 p-2"
-							onclick={async () => {
-								const confirmed = await modal.showConfirmModal({
-									title: 'Delete Guild',
-									message: 'Are you sure you want to delete this guild? This action cannot be undone.',
-									confirmText: 'Delete',
-									cancelText: 'Cancel',
-								});
-								if (confirmed) {
-									const message = {
-										type: MessageType.DELETE_GUILD,
-										data: {
-											guild_id: playerGuild?.id
-										}
-									};
-									const response = await ws.sendAndWait(message);
-									if (response.success) {
-										toast.add('Guild deleted successfully', 'Success');
-									} else {
-										toast.add('Failed to delete guild', 'Error');
-									}
-								}
-							}}
-						>
-							<Trash class="h-4 w-4" />
-						</button>
-					</Tooltip>
 				</div>
 
 				<nav
