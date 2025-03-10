@@ -26,6 +26,7 @@
 	type RawDataType = 'guild' | 'base' | 'player' | 'pal' | 'item_container' | 'character_container';
 	const appState = getAppState();
 	const modal = getModalState();
+	const ws = getSocketState();
 
 	let jsons: Record<RawDataType, JsonContent> = $state({
 		guild: { content: { text: '' } },

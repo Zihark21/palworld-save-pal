@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { palsData, buildingsData, itemsData, presetsData } from '$lib/data';
-	import { getAppState, getModalState, getToastState } from '$states';
+	import { getAppState, getModalState, getSocketState, getToastState } from '$states';
 	import { Input, List, Tooltip, TooltipButton } from '$components/ui';
 	import {
 		type ItemContainer,
@@ -29,6 +29,7 @@
 	const appState = getAppState();
 	const modal = getModalState();
 	const toast = getToastState();
+	const ws = getSocketState();
 
 	const VISIBLE_PAGE_BUBBLES = 16;
 
